@@ -36,7 +36,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-actuator")
     // end::actuator[]
     testCompile("junit:junit")
-    //compile('spring-boot-starter-thymeleaf')
+    compile('org.mongodb:mongo-java-driver:2.13.1')
 }
 
 task wrapper(type: Wrapper) {
