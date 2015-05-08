@@ -2,6 +2,7 @@ package com.edison.resources.services;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import org.bson.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +10,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Created by mrugen on 5/7/15.
- */
 @Component
 public class DataService {
     @Autowired
@@ -28,6 +29,20 @@ public class DataService {
             parking.update(filter,update);
         }else{
             parking.insert(update);
+        }
+    }
+
+    public List<DBObject> findNearest(Double lat, Double lon) {
+        final DBCollection parking = client.getDB("edison").getCollection("parking");
+        final BasicDBObject query = new BasicDBObject("type", "Point");
+        final BasicDBObject geometry = new BasicDBObject("$geometry", query.append("coordinates", Arrays.asList(lon, lat)));
+        final BasicDBObject near = new BasicDBObject("$near", new BasicDBObject(geometry));
+        final BasicDBObject coordinates = new BasicDBObject("coordinates", near);
+        final List<DBObject> nearbySpots = parking.find(coordinates).toArray();
+        if(nearbySpots!=null && !nearbySpots.isEmpty()){
+            return nearbySpots.stream().map(spot->{spot.removeField("_id");return spot;}).collect(Collectors.toList());
+        }else{
+            return Collections.emptyList();
         }
     }
 }
